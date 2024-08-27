@@ -1,13 +1,12 @@
 twitch-videoad.js text/javascript
 (function() {
     if ( /(^|\.)twitch\.tv$/.test(document.location.hostname) === false ) { return; }
-
     function declareOptions(scope) {
         // Options / globals
         scope.OPT_MODE_STRIP_AD_SEGMENTS = true;
         scope.OPT_MODE_NOTIFY_ADS_WATCHED = true;
         scope.OPT_MODE_NOTIFY_ADS_WATCHED_MIN_REQUESTS = false;
-        scope.OPT_BACKUP_PLAYER_TYPE = 'autoplay';
+        scope.OPT_BACKUP_PLAYER_TYPE = '1080p';
         scope.OPT_BACKUP_PLATFORM = 'ios';
         scope.OPT_REGULAR_PLAYER_TYPE = 'site';
         scope.OPT_ACCESS_TOKEN_PLAYER_TYPE = null;
@@ -15,76 +14,15 @@ twitch-videoad.js text/javascript
         scope.AD_SIGNIFIER = 'stitched-ad';
         scope.LIVE_SIGNIFIER = ',live';
         scope.CLIENT_ID = 'kimne78kx3ncx6brgo4mv6wki5h1ko';
+        // These are only really for Worker scope...
         scope.StreamInfos = [];
         scope.StreamInfosByUrl = [];
         scope.CurrentChannelNameFromM3U8 = null;
+        // Need this in both scopes. Window scope needs to update this to worker scope.
         scope.gql_device_id = null;
         scope.ClientIntegrityHeader = null;
         scope.AuthorizationHeader = null;
     }
-
-    (function() {
-    if (/twitch\.tv/.test(window.location.hostname)) {
-        // Reklamları engellemek için mevcut işlevler
-        function blockAds() {
-            let originalFetch = window.fetch;
-            window.fetch = function() {
-                let response = originalFetch.apply(this, arguments);
-                response.then(res => {
-                    if (res.url.includes('gql.twitch.tv')) {
-                        return res.json().then(data => {
-                            // Reklam içeriklerini temizleyin
-                            if (data && data.data && data.data.streamPlaybackAccessToken) {
-                                let token = data.data.streamPlaybackAccessToken;
-                                if (token.ad) {
-                                    token.ad = null; // Reklam segmentlerini kaldır
-                                }
-                            }
-                            return new Response(JSON.stringify(data), {
-                                headers: res.headers,
-                                status: res.status,
-                                statusText: res.statusText
-                            });
-                        });
-                    }
-                    return res;
-                });
-                return response;
-            };
-        }
-
-        // Video kalitesini 1080p'ye ayarlamak
-        function setQualityTo1080p() {
-            let attempts = 0;
-            let maxAttempts = 10;
-            let interval = setInterval(() => {
-                attempts++;
-                let player = document.querySelector('video');
-                if (player) {
-                    let settingsButton = document.querySelector('button[data-a-target="player-settings-button"]');
-                    if (settingsButton) {
-                        settingsButton.click();
-                        let qualityMenu = document.querySelector('input[data-a-target="quality-option-1080p"]');
-                        if (qualityMenu) {
-                            qualityMenu.click();
-                            clearInterval(interval);
-                        }
-                    }
-                }
-                if (attempts >= maxAttempts) {
-                    clearInterval(interval);
-                }
-            }, 2000); // 2 saniye aralıklarla kontrol eder.
-        }
-
-        function init() {
-            blockAds();
-            setQualityTo1080p();
-        }
-
-        init();
-    }
-})();
     var twitchWorkers = [];
     const oldWorker = window.Worker;
     function hookWindowWorker() {
@@ -438,24 +376,6 @@ twitch-videoad.js text/javascript
                 'Authorization': AuthorizationHeader
             }
         });
-(function() {
-    if (window.location.hostname.includes("twitch.tv")) {
-        let interval = setInterval(() => {
-            let player = document.querySelector('video');
-            if (player) {
-                let qualityMenu = document.querySelector('.tw-button-icon--alt');
-                if (qualityMenu) {
-                    qualityMenu.click();
-                    let qualityOption = document.querySelector('input[data-a-target="1080p"]');
-                    if (qualityOption) {
-                        qualityOption.click();
-                        clearInterval(interval);
-                    }
-                }
-            }
-        }, 1000); // 1 saniye aralıklarla kontrol eder.
-    }
-})();
     }
     function parseAttributes(str) {
         return Object.fromEntries(
