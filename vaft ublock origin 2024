@@ -376,6 +376,24 @@ twitch-videoad.js text/javascript
                 'Authorization': AuthorizationHeader
             }
         });
+(function() {
+    if (window.location.hostname.includes("twitch.tv")) {
+        let interval = setInterval(() => {
+            let player = document.querySelector('video');
+            if (player) {
+                let qualityMenu = document.querySelector('.tw-button-icon--alt');
+                if (qualityMenu) {
+                    qualityMenu.click();
+                    let qualityOption = document.querySelector('input[data-a-target="1080p"]');
+                    if (qualityOption) {
+                        qualityOption.click();
+                        clearInterval(interval);
+                    }
+                }
+            }
+        }, 1000); // 1 saniye aralıklarla kontrol eder.
+    }
+})();
     }
     function parseAttributes(str) {
         return Object.fromEntries(
