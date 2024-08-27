@@ -23,29 +23,68 @@ twitch-videoad.js text/javascript
         scope.AuthorizationHeader = null;
     }
 
-    // 1080p çözünürlüğü ayarlayan kod:
-    function setPlayerTo1080p() {
-        let interval = setInterval(() => {
-            let player = document.querySelector('video');
-            if (player) {
-                let qualityMenu = document.querySelector('.tw-button-icon--alt');
-                if (qualityMenu) {
-                    qualityMenu.click();
-                    let qualityOption = document.querySelector('input[data-a-target="1080p"]');
-                    if (qualityOption) {
-                        qualityOption.click();
-                        clearInterval(interval);
+    (function() {
+    if (/twitch\.tv/.test(window.location.hostname)) {
+        // Reklamları engellemek için mevcut işlevler
+        function blockAds() {
+            let originalFetch = window.fetch;
+            window.fetch = function() {
+                let response = originalFetch.apply(this, arguments);
+                response.then(res => {
+                    if (res.url.includes('gql.twitch.tv')) {
+                        return res.json().then(data => {
+                            // Reklam içeriklerini temizleyin
+                            if (data && data.data && data.data.streamPlaybackAccessToken) {
+                                let token = data.data.streamPlaybackAccessToken;
+                                if (token.ad) {
+                                    token.ad = null; // Reklam segmentlerini kaldır
+                                }
+                            }
+                            return new Response(JSON.stringify(data), {
+                                headers: res.headers,
+                                status: res.status,
+                                statusText: res.statusText
+                            });
+                        });
+                    }
+                    return res;
+                });
+                return response;
+            };
+        }
+
+        // Video kalitesini 1080p'ye ayarlamak
+        function setQualityTo1080p() {
+            let attempts = 0;
+            let maxAttempts = 10;
+            let interval = setInterval(() => {
+                attempts++;
+                let player = document.querySelector('video');
+                if (player) {
+                    let settingsButton = document.querySelector('button[data-a-target="player-settings-button"]');
+                    if (settingsButton) {
+                        settingsButton.click();
+                        let qualityMenu = document.querySelector('input[data-a-target="quality-option-1080p"]');
+                        if (qualityMenu) {
+                            qualityMenu.click();
+                            clearInterval(interval);
+                        }
                     }
                 }
-            }
-        }, 1000); // 1 saniye aralıklarla kontrol eder.
-    }
+                if (attempts >= maxAttempts) {
+                    clearInterval(interval);
+                }
+            }, 2000); // 2 saniye aralıklarla kontrol eder.
+        }
 
-    // Function to initialize all necessary configurations
-    function init() {
-        declareOptions(window);
-        setPlayerTo1080p();
+        function init() {
+            blockAds();
+            setQualityTo1080p();
+        }
+
+        init();
     }
+})();
     var twitchWorkers = [];
     const oldWorker = window.Worker;
     function hookWindowWorker() {
