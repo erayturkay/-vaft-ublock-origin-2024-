@@ -3,26 +3,21 @@ twitch-videoad.js text/javascript
     if ( /(^|\.)twitch\.tv$/.test(document.location.hostname) === false ) { return; }
     function declareOptions(scope) {
         // Options / globals
-        scope.OPT_MODE_STRIP_AD_SEGMENTS = true;
-        scope.OPT_MODE_NOTIFY_ADS_WATCHED = true;
-        scope.OPT_MODE_NOTIFY_ADS_WATCHED_MIN_REQUESTS = false;
-        scope.OPT_BACKUP_PLAYER_TYPE = 'picture-by-picture'; //Source
-        scope.OPT_BACKUP_PLATFORM = 'ios';
-        scope.OPT_REGULAR_PLAYER_TYPE = 'site'; //Source
-        scope.OPT_ACCESS_TOKEN_PLAYER_TYPE = null;
-        scope.OPT_SHOW_AD_BANNER = true;
-        scope.AD_SIGNIFIER = 'stitched-ad';
-        scope.LIVE_SIGNIFIER = ',live';
-        scope.CLIENT_ID = 'kimne78kx3ncx6brgo4mv6wki5h1ko';
-        // These are only really for Worker scope...
-        scope.StreamInfos = [];
-        scope.StreamInfosByUrl = [];
-        scope.CurrentChannelNameFromM3U8 = null;
-        // Need this in both scopes. Window scope needs to update this to worker scope.
-        scope.gql_device_id = null;
-        scope.ClientIntegrityHeader = null;
-        scope.AuthorizationHeader = null;
-    }
+    scope.AdSignifier = 'stitched';
+    scope.ClientID = 'kimne78kx3ncx6brgo4mv6wki5h1ko';
+    scope.ClientVersion = 'null';
+    scope.ClientSession = 'null';
+    scope.PlayerType1 = 'site'; //Source
+    scope.PlayerType2 = 'thunderdome'; //480p
+    scope.PlayerType3 = 'pop_tart'; //480p
+    scope.PlayerType4 = 'picture-by-picture'; //360p
+    scope.CurrentChannelName = null;
+    scope.UsherParams = null;
+    scope.WasShowingAd = false;
+    scope.GQLDeviceID = null;
+    scope.HideBlockingMessage = false;
+    scope.IsSquadStream = false;
+}
     var twitchWorkers = [];
     const oldWorker = window.Worker;
     function hookWindowWorker() {
