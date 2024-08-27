@@ -1,12 +1,12 @@
-twitch-videoad.js text/javascript
 (function() {
     if ( /(^|\.)twitch\.tv$/.test(document.location.hostname) === false ) { return; }
+
     function declareOptions(scope) {
         // Options / globals
         scope.OPT_MODE_STRIP_AD_SEGMENTS = true;
         scope.OPT_MODE_NOTIFY_ADS_WATCHED = true;
         scope.OPT_MODE_NOTIFY_ADS_WATCHED_MIN_REQUESTS = false;
-        scope.OPT_BACKUP_PLAYER_TYPE = 'autoplay'; //1080p
+        scope.OPT_BACKUP_PLAYER_TYPE = 'autoplay';
         scope.OPT_BACKUP_PLATFORM = 'ios';
         scope.OPT_REGULAR_PLAYER_TYPE = 'site';
         scope.OPT_ACCESS_TOKEN_PLAYER_TYPE = null;
@@ -14,15 +14,41 @@ twitch-videoad.js text/javascript
         scope.AD_SIGNIFIER = 'stitched-ad';
         scope.LIVE_SIGNIFIER = ',live';
         scope.CLIENT_ID = 'kimne78kx3ncx6brgo4mv6wki5h1ko';
-        // These are only really for Worker scope...
         scope.StreamInfos = [];
         scope.StreamInfosByUrl = [];
         scope.CurrentChannelNameFromM3U8 = null;
-        // Need this in both scopes. Window scope needs to update this to worker scope.
         scope.gql_device_id = null;
         scope.ClientIntegrityHeader = null;
         scope.AuthorizationHeader = null;
     }
+
+    // 1080p çözünürlüğü ayarlayan kod:
+    function setPlayerTo1080p() {
+        let interval = setInterval(() => {
+            let player = document.querySelector('video');
+            if (player) {
+                let qualityMenu = document.querySelector('.tw-button-icon--alt');
+                if (qualityMenu) {
+                    qualityMenu.click();
+                    let qualityOption = document.querySelector('input[data-a-target="1080p"]');
+                    if (qualityOption) {
+                        qualityOption.click();
+                        clearInterval(interval);
+                    }
+                }
+            }
+        }, 1000); // 1 saniye aralıklarla kontrol eder.
+    }
+
+    // Function to initialize all necessary configurations
+    function init() {
+        declareOptions(window);
+        setPlayerTo1080p();
+    }
+
+    init();
+
+})();
     var twitchWorkers = [];
     const oldWorker = window.Worker;
     function hookWindowWorker() {
