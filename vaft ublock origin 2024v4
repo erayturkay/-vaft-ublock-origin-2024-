@@ -46,10 +46,6 @@ twitch-videoad.js text/javascript
         declareOptions(window);
         setPlayerTo1080p();
     }
-
-    init();
-
-})();
     var twitchWorkers = [];
     const oldWorker = window.Worker;
     function hookWindowWorker() {
