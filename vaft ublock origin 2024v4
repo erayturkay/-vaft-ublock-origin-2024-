@@ -1,0 +1,34 @@
+twitch-videoad.js text/javascript
+(function() {
+    if ( /(^|\.)twitch\.tv$/.test(document.location.hostname) === false ) { return; }
+    // For uBlock Origin's "My filters" or in a custom `.js` file
+
+(function() {
+    'use strict';
+
+    // Ad-blocking code here (original video-swap-new functionality)
+
+    // Attempt to set video quality to 1080p after the player loads
+    function setQuality() {
+        const player = document.querySelector('video');
+        if (!player) return;
+
+        const qualityButton = document.querySelector('.player-settings__menu-item.player-settings__submenu-button');
+        if (!qualityButton) return;
+
+        qualityButton.click();
+
+        const qualityOptions = [...document.querySelectorAll('.tw-interactive')];
+        const quality1080p = qualityOptions.find(option => option.textContent.includes('1080p'));
+        if (quality1080p) {
+            quality1080p.click();
+        }
+    }
+
+    const observer = new MutationObserver(() => {
+        setQuality();
+    });
+
+    observer.observe(document.body, { childList: true, subtree: true });
+})();
+
